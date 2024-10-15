@@ -1,0 +1,16 @@
+npm create vite@latest
+
+npm install react-data-table-component styled-components axios react-icons react-router-dom tailwindcss postcss autoprefixer
+
+# Create folder inside that folder
+npm init -y
+npm install bcrypt cors express jsonwebtoken mongoose multer nodemon path
+
+# Create index.js file
+
+# Add to package.json
+# type: module
+# start script:
+nodemon --env-file=.env index.js
+
+# Create .env file
