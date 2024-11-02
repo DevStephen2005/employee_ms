@@ -2,3 +2,94 @@
   margin: 0;
   padding: 0;
 }
+
+/* Table Styling all components  */
+body {
+  background-color: rgb(220, 220, 232);
+}
+
+.container {
+  background-color: white !important;  /* Forces background color */
+  color: black !important;              /* Forces text color */
+  height: max-content !important ;       /* Forces height */
+  width: 70% !important;                /* Forces width */
+  position: absolute !important;           /* Forces position */
+  left: 20% !important;                /* Forces right alignment */
+  top: 10% !important;                  /* Forces top alignment */
+  padding: 20px !important;             /* Forces padding */
+}
+
+.container h2 {
+  text-align: center;
+}
+
+.table {
+  width: max-content;
+  border-collapse: collapse;
+  cursor: pointer;
+  padding: 10px;
+  margin-top: 40px;
+}
+.table th,
+td {
+  padding: 5px;
+  text-align: center;
+  border: 1px solid gray;
+}
+.table tr:nth-child(even) {
+  background-color: rgb(243, 225, 192);
+}
+.table tr:hover {
+  background-color: rgb(243, 225, 192);
+}
+/*Btn styling*/
+.btn {
+  padding: 6px 12px;
+  color: white;
+  cursor: pointer;
+  border: none;
+  margin: 3% 0;
+  font-weight: 600;
+}
+.btn:hover {
+  background-color: black;
+  font-weight: 400;
+}
+.green {
+  background-color: green;
+}
+.red {
+  background-color: red;
+}
+.blue {
+  background-color: blue;
+}
+.yellow {
+  background-color: rgb(220, 68, 13);
+}
+.addBtn {
+  float: right !important;
+  width: fit-content !important;
+}
+
+.searchBar {
+  margin-top: 4%;
+}
+.searchBar input {
+  padding: 6px;
+  width: 50%;
+  border: 1px solid rgb(26, 25, 25);
+  font-size: 17px;
+  font-weight: 400;
+}
+
+.employee-image {
+  width: 50px; /* Adjust the size as needed */
+  height: 50px;
+  object-fit: cover; /* Maintain aspect ratio and crop the image if needed */
+  border-radius: 50%; /* Make it circular if you like */
+}
+.logoutBtn{
+  width: 70%;
+  padding: 6px 12px;
+}

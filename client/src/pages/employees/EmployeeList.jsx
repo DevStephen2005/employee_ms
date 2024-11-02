@@ -1,13 +1,11 @@
-import "../../css/employeeList.css";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
 const EmployeeList = () => {
   const [employees, setEmployees] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(""); // State for search input
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Retrieve employee data
   useEffect(() => {
     axios
       .get("http://localhost:8000/getEmp")
@@ -18,99 +16,105 @@ const EmployeeList = () => {
       .catch((err) => console.log(err));
   }, []);
 
-  // Delete Record
   const deleteHandler = (id) => {
     axios
       .delete("http://localhost:8000/deleteEmp/" + id)
       .then((result) => {
         console.log(result);
-        location.reload();
+        setEmployees(employees.filter((emp) => emp._id !== id));
       })
       .catch((err) => console.log(err));
   };
 
-  // Filter employees based on search input
   const filteredEmployees = employees.filter((emp) =>
     emp.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="container">
-      <h2>MANAGE EMPLOYEES</h2>
+      <h2 className="text-2xl text-black font-semibold">Manage Employees</h2>
 
-      <Link to="/addEmployee">
-        <button className="btn green addBtn">Add Employee</button>
+      <Link to="/adminDashboard">
+        <button className="w-40 bg-blue-700 text-white py-2 rounded-md hover:bg-indigo-600 focus:outline-none focus:ring focus:ring-indigo-200 text-lg font-semibold flex items-center justify-center">
+          <i className="fas fa-arrow-left mr-2"></i>{" "}
+          Dashboard
+        </button>
       </Link>
 
-      {/* Search bar */}
+      <Link to="/addEmployee">
+        <button className="btn green addBtn text-lg font-semibold w-10">
+          Add Employee
+        </button>
+      </Link>
+
       <div className="searchBar">
         <input
           type="text"
           placeholder="Search By Employee Name"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)} // Update searchTerm state
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      {/* Employee table */}
-      <table className="table">
-        <thead>
-          <tr>
-            <th>S.NO</th>
-            <th>Image</th>
-            <th>Name</th>
-            <th>DOB</th>
-            <th>Department</th>
-            <th>View</th>
-            <th>Leave</th>
-            <th>Salary</th>
-            <th>Update</th>
-            <th>Delete</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {filteredEmployees.map((emp, index) => (
-            <tr key={emp._id}>
-              <td>{index + 1}</td>
-              <td>
-                <img
-                  src={`http://localhost:8000/uploads/${emp.image}`} // Change to emp.image
-                  alt={emp.name} // Change to emp.name
-                  width="60"
-                  height="60"
-                />
-              </td>
-              <td>{emp.name}</td>
-              <td>{emp.dob}</td>
-              <td>{emp.department}</td>
-              <td>
-                <button className="btn blue">View</button>
-              </td>
-              <td>
-                <button className="btn red">Leave</button>
-              </td>
-              <td>
-                <button className="btn yellow">Salary</button>
-              </td>
-              <td>
-                <Link to={`/updateEmp/${emp._id}`}>
-                  <button className="btn green">Update</button>
-                </Link>
-              </td>
-              <td>
-                <button
-                  className="btn red"
-                  onClick={() => deleteHandler(emp._id)}
-                >
-                  Delete
-                </button>
-              </td>
+      <div className="table_container">
+        <table className="table">
+          <thead>
+            <tr>
+              <th>S.NO</th>
+              <th>Image</th>
+              <th>Name</th>
+              <th>DOB</th>
+              <th>Department</th>
+              <th>View</th>
+              <th>Leave</th>
+              <th>Salary</th>
+              <th>Update</th>
+              <th>Delete</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-      <Link to='/adminDashboard' > <button>Back to Dashboard</button> </Link>
+          </thead>
+          <tbody>
+            {filteredEmployees.map((emp, index) => (
+              <tr key={emp._id}>
+                <td>{index + 1}</td>
+                <td>
+                  <img
+                    src={`http://localhost:8000/uploads/${emp.image}`}
+                    alt={emp.name}
+                    className="employee-image"
+                  />
+                </td>
+                <td>{emp.name}</td>
+                <td>{new Date(emp.dob).toLocaleDateString()}</td>
+                <td>{emp.department}</td>
+                <td>
+                  <Link to={`/viewEmp/${emp._id}`}>
+                    <button className="btn blue">View</button>
+                  </Link>
+                </td>
+                <td>
+                  <Link to='/leave'> <button className="btn red">Leave</button>  </Link>
+                </td>
+                <td>
+                  <button className="btn yellow">Salary</button>
+                </td>
+                <td>
+                  <Link to={`/updateEmp/${emp._id}`}>
+                    <button className="btn green">Update</button>
+                  </Link>
+                </td>
+                <td>
+                  <button
+                    className="btn red"
+                    onClick={() => deleteHandler(emp._id)}
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

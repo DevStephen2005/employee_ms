@@ -1,114 +1,136 @@
-import { useState } from 'react';
-import '../css/login.css';
-import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useAuth } from '../contexts/AuthContext';
 
-const Login = () => {
+function Login() {
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
   const [errors, setErrors] = useState({});
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
 
   const validateForm = () => {
     const newErrors = {};
-  
+    
     // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!emailRegex.test(email)) {
-      newErrors.email = 'Enter a valid email address';
+    if (!formData.email) {
+      newErrors.email = "Email is required.";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email.";
     }
-  
+
     // Validate password
-    const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*[0-9]).{6,}$/;
-    if (!password) {
-      newErrors.password = 'Password is required';
-    } else if (!passwordRegex.test(password)) {
-      newErrors.password = 'Password must contain at least one uppercase letter, one special character, and one number, and be at least 6 characters long';
+    if (!formData.password) {
+      newErrors.password = "Password is required.";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters.";
+    } else if (!/[a-z]/.test(formData.password)) {
+      newErrors.password = "Password must contain at least one lowercase letter.";
+    } else if (!/[0-9]/.test(formData.password)) {
+      newErrors.password = "Password must contain at least one number.";
     }
-  
+
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0; // Return true if no errors
+    return Object.keys(newErrors).length === 0;
   };
-  
 
-  const submitHandler = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-  
+    
     if (validateForm()) {
-      axios.post('http://localhost:8000/login',{email, password })
+      axios.post('http://localhost:8000/login', formData)
         .then((result) => {
-          if (result.data === 'success') {
-            navigate('/employeeDashboard');
-            LoginToast();
-          
-            if(result.data === 'success' && email.trim() === "admin@gmail.com" && password.trim() === "Admin@100"){
-              navigate("/adminDashboard")
+          if (result.data.success) {
+            // Redirect based on user role
+            if (formData.email.trim() === "admin@gmail.com" && formData.password.trim() === "Admin@100") {
+              navigate("/adminDashboard");
+            } else {
+              navigate('/employeeDashboard');
             }
-
-          } else if (result.data === 'password incorrect') {
-            toast.error('Password incorrect');
-            setErrors({ password: 'Password incorrect. Please try again.' });
-          } else if (result.data === 'user not found') {
-            toast.error('User not found');
-            setErrors({ email: 'User not found. Please check your email or sign up.' });
+  
+            // Store user data in context
+            setUser({
+              email: result.data.user.email,
+            });
+            toast.success(result.data.message); // Show success message
+          } else {
+            // Handle unsuccessful login
+            toast.error(result.data.message); // Show error message from server
+            if (result.data.message === 'Password incorrect') {
+              setErrors({ password: 'Password incorrect. Please try again.' });
+            } else if (result.data.message === 'User not found') {
+              setErrors({ email: 'User not found. Please check your email or sign up.' });
+            }
           }
         })
         .catch((err) => {
           console.log(err);
           toast.error('An error occurred. Please try again.');
         });
-    } 
+    } else {
+      console.log('Validation failed');
+    }
   };
   
-
-  const LoginToast = () => toast.success('User Login success');
-
   return (
-    <div className='login'>
-      <h1>Employee Management System</h1>
-      <div className="login-container">
-      <form className="login-form" onSubmit={submitHandler}>
-        <h2>Login</h2>
-        <div className="form-group">
-          <label htmlFor="email">Email</label>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <form onSubmit={handleSubmit} className="w-full max-w-md p-8 bg-white shadow-md rounded-lg mt-10 border border-black">
+        <h2 className="text-2xl font-semibold text-center mb-6">Login</h2>
+
+        <label className="block mb-4 font-semibold ">
+          <span className="text-black text-lg">Email Address</span>
           <input
             type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Enter your email..."
+            className="mt-1 block w-full px-3 py-2 border border-black rounded-md focus:outline-none focus:ring focus:ring-indigo-400"
             required
-            placeholder='Enter the Email'
           />
-          {errors.email && <p className="error-message">{errors.email}</p>}
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Password</label>
+          {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+        </label>
+
+        <label className="block mb-6 font-semibold">
+          <span className="text-black text-lg">Password</span>
           <input
             type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="Enter your password..."
+            className="mt-1 block w-full px-3 py-2 border border-black rounded-md focus:outline-none focus:ring focus:ring-indigo-200"
             required
-            placeholder='Enter the password'
           />
-          {errors.password && <p className="error-message">{errors.password}</p>}
-        </div>
-        <button type="submit">Login</button>
+          {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+        </label>
 
-        <div className="foot ">
-          <span>Not a member?</span>
-          <Link to="/register">
-            <span className="signup"> Register</span>
-          </Link>
-        </div>
+        <button
+          type="submit"
+          className="w-full bg-indigo-500 text-white py-2 rounded-md text-lg font-semibold hover:bg-indigo-600 focus:outline-none focus:ring focus:ring-indigo-200"
+        >
+          Login
+        </button>
+
+        <p className="text-center mt-4">
+          Don’t have an account? <Link to="/register" className="text-red-500 hover:underline font-semibold">Register here</Link>
+        </p>
       </form>
     </div>
-    </div>
   );
-};
+}
 
 export default Login;
